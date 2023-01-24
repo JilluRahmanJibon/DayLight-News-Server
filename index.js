@@ -52,6 +52,7 @@ async function run() {
     const votingNewsCollection = client
       .db("DaylightNews")
       .collection("votingNews");
+    const districtCollection = client.db("DaylightNews").collection("district");
 
     // Verify Admin
     const verifyAdmin = async (req, res, next) => {
@@ -394,6 +395,19 @@ async function run() {
       const query = { email: email };
       const reactions = await reactionsCollection.find(query).toArray();
       res.send(reactions);
+    });
+
+    // get all data district wise
+    app.get("/districts", async (req, res) => {
+      const district = await districtCollection.find({}).toArray();
+      res.send(district);
+    });
+    //if you want to get data by districts district
+    app.get("/districts?district=:district", async (req, res) => {
+      const district = req.params.district;
+      const query = { district: district };
+      const districtData = await districtCollection.find(query).toArray();
+      res.send(districtData);
     });
   } catch (error) {
     console.log(error);
