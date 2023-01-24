@@ -46,7 +46,9 @@ async function run() {
     const writersCollection = client.db("DaylightNews").collection("writers");
     const allNewsCollection = client.db("DaylightNews").collection("allNews");
     const commentsCollection = client.db("DaylightNews").collection("comments");
-    const likesCollection = client.db("DaylightNews").collection("likes");
+    const reactionsCollection = client
+      .db("DaylightNews")
+      .collection("reactions");
     const votingNewsCollection = client
       .db("DaylightNews")
       .collection("votingNews");
@@ -341,19 +343,44 @@ async function run() {
     });
 
     // post a like
-    app.post("/likes", verifyJWT, async (req, res) => {
-      const like = req.body;
-      const result = await likesCollection.insertOne(like);
+    app.put("/reactions", async (req, res) => {
+      const { id } = req.query;
+      const query = { reactionNewsId: id };
+      const reaction = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          reactionNewsId: reaction?.reactionNewsId,
+          smileEmoji: reaction?.smileEmoji.smileEmoji,
+          frownEmoji: reaction?.frownEmoji.frownEmoji,
+          angryEmoji: reaction?.angryEmoji.angryEmoji,
+          sunglasEmoji: reaction?.sunglasEmoji.sunglasEmoji,
+          naturalEmoji: reaction?.naturalEmoji.naturalEmoji,
+        },
+      };
+
+      const result = await reactionsCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
     // get reactions by news id
     app.get("/reactions/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { newsId: id };
-      const likes = await likesCollection.find(query).toArray();
-      res.send(likes);
+      const query = { reactionNewsId: id };
+      const reactions = await reactionsCollection.findOne(query);
+      res.send(reactions);
     });
+
+    // get all reactions
+    app.get("/reactions", verifyJWT, async (req, res) => {
+      const reactions = await reactionsCollection.find({}).toArray();
+      res.send(reactions);
+    });
+
     // remove a like
     app.delete("/reactions/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
