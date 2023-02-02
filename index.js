@@ -49,6 +49,8 @@ async function run() {
     const reactionsCollection = client
       .db("DaylightNews")
       .collection("reactions");
+    const storiesCollection = client.db("DaylightNews").collection("stories");
+
     const votingNewsCollection = client
       .db("DaylightNews")
       .collection("votingNews");
