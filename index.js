@@ -421,7 +421,11 @@ async function run() {
     // post a comment
     app.post("/comments", async (req, res) => {
       const comment = req.body;
-      const result = await commentsCollection.insertOne({ comment });
+      const { id } = req.query;
+      const result = await commentsCollection.insertOne({
+        comment,
+        _id: ObjectId(id),
+      });
       res.send(result);
     });
 
@@ -434,16 +438,27 @@ async function run() {
     // get comments by news id
     app.get("/comment/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { "comment._id": id };
+      const query = { _id: id };
+      console.log(query);
+      const cursor = commentsCollection.find(query);
+      const comments = await cursor.toArray();
+      res.send(comments);
+    });
+
+    // get news by id in comment in comment
+    app.get("/comment/comment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { "comment.comment.id.id": id };
+      console.log(query);
       const cursor = commentsCollection.find(query);
       const comments = await cursor.toArray();
       res.send(comments);
     });
 
     // delete a comment
-    app.delete("/comment/:id", verifyJWT, async (req, res) => {
+    app.delete("/comment/comment/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: ObjectId(id) };
+      const query = { "comment.comment.id.id": id };
       const result = await commentsCollection.deleteOne(query);
       res.send(result);
     });
