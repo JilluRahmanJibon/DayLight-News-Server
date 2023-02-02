@@ -190,17 +190,115 @@ async function run() {
       const result = await allNewsCollection.insertOne(news);
       res.send(result);
     });
+
+    // get categories
+    app.get("/categories", async (req, res) => {
+      const categories = await allNewsCollection.find({}).toArray();
+      const allCategories = categories?.map((cate) => cate.category);
+      const category = [...new Set(allCategories)];
+      res.send(category);
+    });
+
     // get all news
     app.get("/news", async (req, res) => {
-      const news = await allNewsCollection.find({}).toArray();
-      res.send(news);
+      const query = {};
+      const result = await allNewsCollection.find(query).toArray();
+      res.send(result);
     });
+
+    app.get("/bannerNews", async (req, res) => {
+      const cursor = allNewsCollection.find({}).sort({ _id: -1 }).limit(7);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/breakingNews", async (req, res) => {
+      const query = { category: "breaking" };
+      const breakingNews = await allNewsCollection.find(query).toArray();
+      res.send(breakingNews);
+    });
+
+    app.get("/trendingNews", async (req, res) => {
+      const query = { category: "HotNews" };
+      const trendingNews = await allNewsCollection.find(query).toArray();
+      res.send(trendingNews);
+    });
+
+    app.get("/letestNews", async (req, res) => {
+      const { letest } = req.query;
+      if (letest) {
+        const query = { category: letest };
+        const letestNews = await allNewsCollection.find(query).toArray();
+        res.send(letestNews);
+      } else {
+        const query = { category: "travel" };
+        const letestNews = await allNewsCollection.find(query).toArray();
+        res.send(letestNews);
+      }
+    });
+
+    app.get("/articleNews", async (req, res) => {
+      const query = { category: "article" };
+      const articleNews = await allNewsCollection.find(query).toArray();
+      res.send(articleNews);
+    });
+
+    app.get("/recentlyNews", async (req, res) => {
+      const recentlyNews = await allNewsCollection
+        .find({})
+        .sort({ _id: -1 })
+        .limit(15)
+        .toArray();
+      res.send(recentlyNews);
+    });
+    app.get("/worldNews", async (req, res) => {
+      const query = { category: "World" };
+      const worldNews = await allNewsCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(worldNews);
+    });
+
+    app.get("/viralNews", async (req, res) => {
+      const query = { category: "viral" };
+      const viralNews = await allNewsCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(viralNews);
+    });
+
+    app.get("/environmentNews", async (req, res) => {
+      const query = { category: "EnvironmentNews" };
+      const environmentNews = await allNewsCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(environmentNews);
+    });
+    app.get("/voicesNews", async (req, res) => {
+      const query = { category: "voices" };
+      const voicesNews = await allNewsCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
+      res.send(voicesNews);
+    });
+
     // get a single news
     app.get("/news/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const news = await allNewsCollection.findOne(query);
 
+      res.send(news);
+    });
+    // district wise news
+    app.get("/district/:district", async (req, res) => {
+      const district = req.params.district;
+      const query = { district: district };
+      const news = await allNewsCollection.find(query).toArray();
       res.send(news);
     });
     // get news for voting
@@ -214,25 +312,40 @@ async function run() {
       res.send(news);
     });
     // get search news
-    app.get("/searchNews", async (req, res) => {
-      let query = {};
-      const search = req.query.search;
+    // app.get("/searchNews", async (req, res) => {
+    //   let query = {};
+    //   const search = req.query.search;
 
-      if (search.length) {
-        query = {
-          $text: {
-            $search: search,
-          },
-        };
-      }
-      const result = await allNewsCollection.find(query).toArray();
-      res.send(result);
-    });
+    //   if (search.length) {
+    //     query = {
+    //       $text: {
+    //         $search: search,
+    //       },
+    //     };
+    //   }
+    //   const result = await allNewsCollection.find(query).toArray()
+    //   res.send(result)
+    // });
+
+    // what is redux?
 
     // voting get data
     app.get("/votingNews", async (req, res) => {
       const data = await votingNewsCollection.find({}).toArray();
       res.send(data);
+    });
+
+    // get stroy
+    app.get("/stories", async (req, res) => {
+      const result = await storiesCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    app.get("/stories/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: ObjectId(id) };
+      const result = await storiesCollection.findOne(query);
+      res.send(result);
     });
     // vote put here
     app.put("/votingNews", async (req, res) => {
@@ -349,15 +462,16 @@ async function run() {
       const { id } = req.query;
       const query = { reactionNewsId: id };
       const reaction = req.body;
+
       const options = { upsert: true };
       const updateDoc = {
         $set: {
-          reactionNewsId: reaction?.reactionNewsId,
-          smileEmoji: reaction?.smileEmoji.smileEmoji,
-          frownEmoji: reaction?.frownEmoji.frownEmoji,
-          angryEmoji: reaction?.angryEmoji.angryEmoji,
-          sunglasEmoji: reaction?.sunglasEmoji.sunglasEmoji,
-          naturalEmoji: reaction?.naturalEmoji.naturalEmoji,
+          reactionNewsId: id,
+          smileEmoji: reaction?.smileEmoji,
+          frownEmoji: reaction?.frownEmoji,
+          angryEmoji: reaction?.angryEmoji,
+          sunglasEmoji: reaction?.sunglasEmoji,
+          naturalEmoji: reaction?.naturalEmoji,
         },
       };
 
@@ -396,14 +510,6 @@ async function run() {
       const query = { email: email };
       const reactions = await reactionsCollection.find(query).toArray();
       res.send(reactions);
-    });
-
-    // district wise news
-    app.get("/district/:district", async (req, res) => {
-      const district = req.params.district;
-      const query = { district: district };
-      const news = await allNewsCollection.find(query).toArray();
-      res.send(news);
     });
   } catch (error) {
     console.log(error);
