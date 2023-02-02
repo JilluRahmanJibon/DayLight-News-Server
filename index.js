@@ -50,7 +50,6 @@ async function run() {
       .db("DaylightNews")
       .collection("reactions");
     const storiesCollection = client.db("DaylightNews").collection("stories");
-
     const votingNewsCollection = client
       .db("DaylightNews")
       .collection("votingNews");
@@ -456,7 +455,24 @@ async function run() {
       const comments = await commentsCollection.find(query).toArray();
       res.send(comments);
     });
-
+    //update a comment
+    app.patch("/comments/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const comment = req.body;
+      const query = { "comment._id": id };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          comment,
+        },
+      };
+      const result = await commentsCollection.updateOne(
+        query,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
     // post a like
     app.put("/reactions", async (req, res) => {
       const { id } = req.query;
