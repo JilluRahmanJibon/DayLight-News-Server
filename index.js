@@ -279,7 +279,7 @@ async function run() {
       res.send(news);
     });
 
-    app.delete("/myNews/:id", async (req, res) => {
+    app.delete("/socialNews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const deleteNews = await SocialNewsCollection.deleteOne(query);
