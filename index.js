@@ -265,9 +265,16 @@ async function run() {
     app.get("/socialNews", async (req, res) => {
       const socialNews = await SocialNewsCollection.find({})
         .sort({ _id: -1 })
-        .limit(15)
+        .limit(-50)
         .toArray();
       res.send(socialNews);
+    });
+    app.get("/socialNews/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const news = await SocialNewsCollection.find(query).toArray();
+
+      res.send(news);
     });
 
     //-------------
