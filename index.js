@@ -59,6 +59,8 @@ function verifyJWT(req, res, next) {
   });
 }
 
+
+
 //MongoDb Add
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.teba24n.mongodb.net/?retryWrites=true&w=majority`;
 
