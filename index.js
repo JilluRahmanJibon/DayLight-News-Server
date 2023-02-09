@@ -272,11 +272,19 @@ async function run() {
     app.get("/socialNews/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const news = await SocialNewsCollection.find(query).toArray();
+      const news = await SocialNewsCollection.find(query)
+        .sort({ _id: -1 })
+        .toArray();
 
       res.send(news);
     });
 
+    app.delete("/myNews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const deleteNews = await SocialNewsCollection.deleteOne(query);
+      res.send(deleteNews);
+    });
     //-------------
     app.get("/articleNews", async (req, res) => {
       const query = { category: "article" };
