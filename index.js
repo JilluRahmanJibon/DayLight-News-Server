@@ -63,6 +63,8 @@ async function run ()
     const reactionsCollection = client.db("DaylightNews").collection("reactions");
     const storiesCollection = client.db("DaylightNews").collection("stories");
     const paymentCollection = client.db("DaylightNews").collection("payment");
+    const gadgetsCollection = client.db("DaylightNews").collection("gadgets");
+    const gadgetOrderCollection = client.db("DaylightNews").collection("gadgetOrder");
 
     const votingNewsCollection = client
       .db("DaylightNews")
@@ -288,9 +290,6 @@ async function run ()
     })
 
 
-
-
-
     app.get('/articleNews', async (req, res) =>
     {
       const query = { category: 'article' }
@@ -343,12 +342,26 @@ async function run ()
 
     })
 
+    app.get('/gadgets', async (req, res) =>
+    {
+      const results = await gadgetsCollection.find({}).toArray()
+      res.send(results)
+    })
 
+    app.post('/gadgets', async (req, res) =>
+    {
+      const data = req.body
+      const result = gadgetOrderCollection.insertOne(data)
+      res.send(result)
+    })
 
-
-
-
-
+    app.get('/orders', async (req, res) =>
+    {
+      const { email } = req.query
+      const query = { email: email }
+      const result = await gadgetOrderCollection.find(query).toArray()
+      res.send(result)
+    })
 
 
     // get a single news
@@ -368,6 +381,8 @@ async function run ()
       const news = await allNewsCollection.find(query).toArray();
       res.send(news);
     });
+
+
     // get news for voting
     app.get("/newsForVoting", async (req, res) =>
     {
@@ -379,23 +394,25 @@ async function run ()
 
       res.send(news);
     });
+
     // get search news
-    // app.get("/searchNews", async (req, res) => {
-    //   let query = {};
-    //   const search = req.query.search;
+    app.get("/searchNews", async (req, res) =>
+    {
+      let query = {};
+      const search = req.query.search;
+      console.log(search)
+      if (search.length)
+      {
+        query = {
+          $text: {
+            $search: search,
+          },
+        };
+      }
+      const result = await allNewsCollection.find(query).toArray()
+      res.send(result)
+    });
 
-    //   if (search.length) {
-    //     query = {
-    //       $text: {
-    //         $search: search,
-    //       },
-    //     };
-    //   }
-    //   const result = await allNewsCollection.find(query).toArray()
-    //   res.send(result)
-    // });
-
-    // what is redux?
 
 
 
@@ -603,8 +620,8 @@ async function run ()
 
 
 
-// payments 
-    
+    // payments 
+
     app.post("/payment", async (req, res) =>
     {
       const payment = req.body;
