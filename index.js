@@ -211,8 +211,10 @@ async function run() {
 
     // get all news
     app.get('/news', async (req, res) => {
-      const query = {}
+      // const query = { district: "district" }
+      // const query = {}
       const result = await allNewsCollection.find(query).toArray()
+      // console.log(result)
       res.send(result)
     })
 
