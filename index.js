@@ -58,6 +58,8 @@ async function run() {
     const gadgetsCollection = client.db("DaylightNews").collection("gadgets");
     const gadgetOrderCollection = client.db("DaylightNews").collection("gadgetOrder");
     const SocialNewsCollection = client.db("DaylightNews").collection("socialMedia");
+    const categoriesCollection = client.db("DaylightNews").collection("categories");
+    const countriesNewsCollection = client.db("DaylightNews").collection("CountriesNews");
 
     const votingNewsCollection = client
       .db("DaylightNews")
@@ -145,9 +147,7 @@ async function run() {
         options
       );
 
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1d",
-      });
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,);
       res.send({ result, token });
     });
 
@@ -204,10 +204,8 @@ async function run() {
     // get categories
     app.get('/categories', async (req, res) => {
       const query = {}
-      const categories = await allNewsCollection.find(query).toArray()
-      const allCategories = categories?.map(cate => cate.category)
-      const category = [...new Set(allCategories)]
-      res.send(category)
+      const categories = await categoriesCollection.find(query).toArray()
+      res.send(categories)
     })
 
     app.get('/categoryNews', async (req, res) => {
@@ -351,6 +349,7 @@ async function run() {
 
     app.delete('/order/:id', async (req, res) => {
       const id = req.params.id;
+
       const filter = { _id: ObjectId(id) }
       const result = await gadgetOrderCollection.deleteOne(filter)
       res.send(result)
@@ -408,6 +407,18 @@ async function run() {
       res.send(result)
     });
 
+    app.get('/countriesNews', async (req, res) => {
+      const result = await countriesNewsCollection.find({}).toArray()
+      res.send(result)
+    })
+
+    app.get('/countriesNews/:country', async (req, res) => {
+      const country = req.params.country
+      console.log(country);
+      const query = { country: country }
+      const result = await countriesNewsCollection.findOne(query)
+      res.send(result)
+    })
 
 
 
